@@ -1330,11 +1330,14 @@
         }
         
         // --- Game Logic ---
-        function handleFirstClick(x, y) {
-    if (!firstClick || gameOver) return;
+        // Add a new flag to track if first click is being processed
+let firstClickInProgress = false;
+
+function handleFirstClick(x, y) {
+    if (!firstClick || gameOver || firstClickInProgress) return;
     
-    // Set firstClick to false immediately to prevent multiple calls
-    firstClick = false;
+    // Set the processing flag to prevent multiple simultaneous calls
+    firstClickInProgress = true;
     
     attemptsSpan.textContent = ''; // Clear previous attempts count
     if (noGuessMode) {
@@ -1360,7 +1363,8 @@
                     console.log(`No Guess Mode: Solvable grid found after ${generationAttempts} attempts.`);
                     attemptsSpan.textContent = `(${generationAttempts} attempts)`;
                     startTimer(); // Start the timer AFTER generation
-                    // firstClick is already false - removed from here
+                    firstClick = false; // Set this after successful generation
+                    firstClickInProgress = false; // Reset the processing flag
                     revealCell(x, y); // Reveal the first clicked cell
                 } else {
                     if (generationAttempts % 100 === 0) {
@@ -1371,6 +1375,7 @@
                         console.error(`No Guess Mode: Generation timed out after ${generationAttempts} attempts.`);
                         alert(`Failed to generate a solvable grid in No Guess Mode after ${generationAttempts} tries. Try reducing density or grid size, or disable No Guess Mode.`);
                         attemptsSpan.textContent = '(Generation Failed)';
+                        firstClickInProgress = false; // Reset the processing flag
                         restartGame(); // Go back to initial state
                         return; // Stop generation attempt
                     }
@@ -1381,7 +1386,8 @@
         // Normal mode: place mines and reveal
         placeMines(x, y);
         startTimer(); // Start the timer
-        // firstClick is already false - removed from here
+        firstClick = false;
+        firstClickInProgress = false; // Reset the processing flag
         revealCell(x, y);
     }
 }
