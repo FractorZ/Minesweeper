@@ -1331,61 +1331,60 @@
         
         // --- Game Logic ---
         function handleFirstClick(x, y) {
-            if (!firstClick || gameOver) return;
-            
-            attemptsSpan.textContent = ''; // Clear previous attempts count
-            
-            if (noGuessMode) {
-                generationAttempts = 0;
-                let solvable = false;
-                console.log("No Guess Mode: Starting generation...");
-                attemptsSpan.textContent = 'Generating...';
-                
-                setTimeout(() => { // Use setTimeout to avoid freezing UI
-                    while (!solvable) {
-                        generationAttempts++;
-                        // Reset grid mines/adjacencies
-                        for (let r = 0; r < height; r++) {
-                            for (let c = 0; c < width; c++) {
-                                if(grid[r]?.[c]){
-                                    grid[r][c].isMine = false;
-                                    grid[r][c].adjacentMines = 0; // Don't reset revealed/flagged state here
-                                }
-                            }
-                        }
-                        
-                        placeMines(x, y); // Place mines avoiding the start area
-                        
-                        if (isSolvableWithoutGuessing(x, y)) {
-                            solvable = true;
-                            console.log(`No Guess Mode: Solvable grid found after ${generationAttempts} attempts.`);
-                            attemptsSpan.textContent = `(${generationAttempts} attempts)`;
-                            startTimer(); // Start the timer AFTER generation
-                            firstClick = false;
-                            revealCell(x, y); // Reveal the first clicked cell
-                        } else {
-                            if (generationAttempts % 100 === 0) {
-                                console.log(`No Guess Mode: Attempt ${generationAttempts}...`);
-                                attemptsSpan.textContent = `Generating... (${generationAttempts})`;
-                            }
-                            if (generationAttempts > 50000) { // Timeout
-                                console.error(`No Guess Mode: Generation timed out after ${generationAttempts} attempts.`);
-                                alert(`Failed to generate a solvable grid in No Guess Mode after ${generationAttempts} tries. Try reducing density or grid size, or disable No Guess Mode.`);
-                                attemptsSpan.textContent = '(Generation Failed)';
-                                restartGame(); // Go back to initial state
-                                return; // Stop generation attempt
-                            }
+    if (!firstClick || gameOver) return;
+    
+    // Set firstClick to false immediately to prevent multiple calls
+    firstClick = false;
+    
+    attemptsSpan.textContent = ''; // Clear previous attempts count
+    if (noGuessMode) {
+        generationAttempts = 0;
+        let solvable = false;
+        console.log("No Guess Mode: Starting generation...");
+        attemptsSpan.textContent = 'Generating...';
+        setTimeout(() => { // Use setTimeout to avoid freezing UI
+            while (!solvable) {
+                generationAttempts++;
+                // Reset grid mines/adjacencies
+                for (let r = 0; r < height; r++) {
+                    for (let c = 0; c < width; c++) {
+                        if(grid[r]?.[c]){
+                            grid[r][c].isMine = false;
+                            grid[r][c].adjacentMines = 0; // Don't reset revealed/flagged state here
                         }
                     }
-                }, 0); // End setTimeout
-            } else {
-                // Normal mode: place mines and reveal
-                placeMines(x, y);
-                startTimer(); // Start the timer
-                firstClick = false;
-                revealCell(x, y);
+                }
+                placeMines(x, y); // Place mines avoiding the start area
+                if (isSolvableWithoutGuessing(x, y)) {
+                    solvable = true;
+                    console.log(`No Guess Mode: Solvable grid found after ${generationAttempts} attempts.`);
+                    attemptsSpan.textContent = `(${generationAttempts} attempts)`;
+                    startTimer(); // Start the timer AFTER generation
+                    // firstClick is already false - removed from here
+                    revealCell(x, y); // Reveal the first clicked cell
+                } else {
+                    if (generationAttempts % 100 === 0) {
+                        console.log(`No Guess Mode: Attempt ${generationAttempts}...`);
+                        attemptsSpan.textContent = `Generating... (${generationAttempts})`;
+                    }
+                    if (generationAttempts > 50000) { // Timeout
+                        console.error(`No Guess Mode: Generation timed out after ${generationAttempts} attempts.`);
+                        alert(`Failed to generate a solvable grid in No Guess Mode after ${generationAttempts} tries. Try reducing density or grid size, or disable No Guess Mode.`);
+                        attemptsSpan.textContent = '(Generation Failed)';
+                        restartGame(); // Go back to initial state
+                        return; // Stop generation attempt
+                    }
+                }
             }
-        }
+        }, 0); // End setTimeout
+    } else {
+        // Normal mode: place mines and reveal
+        placeMines(x, y);
+        startTimer(); // Start the timer
+        // firstClick is already false - removed from here
+        revealCell(x, y);
+    }
+}
         
         function updateFlagMethodListeners(cell, x, y) {
             if(!cell) return; // Safety check
