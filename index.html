@@ -2279,8 +2279,8 @@ function handleFirstClick(x, y) {
             const currentName = playerNameInput.value.trim() || "Player";
             
             // Basic check: Don't submit default name "Player" or empty names automatically
-            if (!currentName || currentName.toLowerCase() === "player") {
-                console.log(`Score not submitted for ${difficultyString}: Enter a unique name.`);
+            if (!currentName) {
+                console.log(`Score not submitted for ${difficultyString}: Enter a valid name.`);
                 
                 // Update local leaderboard even if not submitting online
                 let bestTimeLocalStr = localStorage.getItem(`leaderboard-${difficultyString}`);
